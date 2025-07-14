@@ -1,4 +1,5 @@
 import re
+import subprocess
 
 README_FILE = 'README.md'
 
@@ -11,14 +12,11 @@ articles = [
 ]
 
 def update_readme(articles):
-    # Read README.md content
     with open(README_FILE, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Join the article list into a single block
     new_block = '\n'.join(articles)
 
-    # Replace the content between the markers
     updated = re.sub(
         r'<!-- ARTICLE LIST START -->(.*?)<!-- ARTICLE LIST END -->',
         f'<!-- ARTICLE LIST START -->\n{new_block}\n<!-- ARTICLE LIST END -->',
@@ -26,12 +24,20 @@ def update_readme(articles):
         flags=re.DOTALL
     )
 
-    # Write the updated content back to README.md
     with open(README_FILE, 'w', encoding='utf-8') as f:
         f.write(updated)
 
     print("✅ README.md updated successfully.")
 
-# Run the update
+def git_push():
+    try:
+        subprocess.run(["git", "add", "."], check=True)  # اضافه کردن همه تغییرات
+        subprocess.run(["git", "commit", "-m", "Update article list"], check=True)
+        subprocess.run(["git", "push"], check=True)
+        print("✅ Changes pushed to GitHub successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Git command failed: {e}")
+
 if __name__ == "__main__":
     update_readme(articles)
+    git_push()
